@@ -8,13 +8,14 @@ architecture behavioural of tb_pwm is
     component pwm is
         generic(
             width: integer;
-            cycle: integer
+            period: integer
         );
         port(
             clk: in std_logic;
             reset: in std_logic;
             input: in std_logic_vector(width - 1 downto 0);
-            output: out std_logic
+            output: out std_logic;
+            update: out std_logic
         );
     end component;
     
@@ -24,18 +25,19 @@ architecture behavioural of tb_pwm is
     
     signal clk: std_logic := '1';
     signal reset: std_logic := '1';
-    signal output: std_logic;
+    signal output, update: std_logic;
 begin
     uut: pwm 
         generic map(
             width => 4,
-            cycle => 10
+            period => 10
         )
         port map(
             clk => clk,
             reset => reset,
             input => input,
-            output => output
+            output => output,
+            update => update
         );      
     
     reset <= '0' after 5*clk_period/2;
