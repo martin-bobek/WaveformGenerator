@@ -8,18 +8,20 @@ architecture behavioural of tb_waveform_generator is
         port(
             clk: in std_logic;
             pwm_out: out std_logic;
-            buttons: in std_logic_vector(4 downto 0)
+            buttons: in std_logic_vector(2 downto 0)
         );
     end component;
     
-    constant clk_period: time := 2ns;
+    constant clk_period: time := 1ns;
         
     signal clk: std_logic := '1';
     signal reset: std_logic := '1';
+    signal amp_down: std_logic := '1';
     signal pwm_out: std_logic;
-    signal buttons: std_logic_vector(4 downto 0) := (others => '0');
+    signal buttons: std_logic_vector(2 downto 0) := (others => '0');
 begin
     buttons(0) <= reset;
+    buttons(2) <= amp_down;
     
     uut: waveform_generator
         port map(

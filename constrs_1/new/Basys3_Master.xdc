@@ -110,10 +110,10 @@ set_property PACKAGE_PIN W5 [get_ports clk]
 ##Buttons
 set_property PACKAGE_PIN U18 [get_ports {buttons[0]}];      #C						
 	set_property IOSTANDARD LVCMOS33 [get_ports {buttons[0]}]
-#set_property PACKAGE_PIN T18 [get_ports {buttons[1]}];     #U
-#	set_property IOSTANDARD LVCMOS33 [get_ports {buttons[1]}]
-#set_property PACKAGE_PIN W19 [get_ports {buttons[2]}];	    #L				
-#	set_property IOSTANDARD LVCMOS33 [get_ports {buttons[2]}]
+set_property PACKAGE_PIN T18 [get_ports {buttons[1]}];      #U
+	set_property IOSTANDARD LVCMOS33 [get_ports {buttons[1]}]
+set_property PACKAGE_PIN W19 [get_ports {buttons[2]}];	    #L				
+	set_property IOSTANDARD LVCMOS33 [get_ports {buttons[2]}]
 #set_property PACKAGE_PIN T17 [get_ports {buttons[3]}];	    #R					
 #	set_property IOSTANDARD LVCMOS33 [get_ports {buttons[3]}]
 #set_property PACKAGE_PIN U17 [get_ports {buttons[4]}];	    #D					
