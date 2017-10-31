@@ -5,7 +5,7 @@ entity waveform_generator is
     port(
         clk: in std_logic;
         pwm_out: out std_logic;
-        buttons: in std_logic_vector(2 downto 0)
+        buttons: in std_logic_vector(4 downto 0)
     );
 end;
 
@@ -28,7 +28,8 @@ architecture behavioural of waveform_generator is
         port(
             clk: in std_logic;
             reset: in std_logic;
-            amp_tick: out std_logic
+            amp_tick: out std_logic;
+            freq_tick: out std_logic
         );
     end component;
     
@@ -62,15 +63,20 @@ architecture behavioural of waveform_generator is
     constant pwm_period: integer := 100;
     constant pwm_width: integer := 7;
     
-    signal reset, amp_up, amp_down, amp_tick: std_logic;
+    signal reset: std_logic; 
+    signal amp_up, amp_down, amp_tick: std_logic;
     signal amplitude: std_logic_vector(6 downto 0);
+    signal freq_up, freq_down, freq_tick: std_logic;
+    signal tick_period: std_logic_vector(13 downto 0);
     signal pwm_value: std_logic_vector(pwm_width - 1 downto 0);
     signal pwm_update: std_logic;
 begin
     reset <= buttons(0);
     amp_up <= buttons(1);
-    amp_down <= buttons(2); -- SHOULD BE BUTTON 4
-
+    amp_down <= buttons(4);
+    freq_up <= buttons(3);
+    freq_down <= buttons(2);
+    
     pwm_gen: pwm
         generic map(
             width => pwm_width,
@@ -88,7 +94,8 @@ begin
         port map(
             clk => clk,
             reset => reset,
-            amp_tick => amp_tick
+            amp_tick => amp_tick,
+            freq_tick => freq_tick
         );
     
     amplitude_counter: ud_counter
@@ -106,6 +113,21 @@ begin
             count => amplitude
         );
     
+    frequency_counter: ud_counter
+        generic map(
+            max => 10000,
+            min => 10,
+            width => 14
+        )
+        port map(
+            clk => clk,
+            reset => reset,
+            enable => freq_tick,
+            up => freq_up,
+            down => freq_down,
+            count => tick_period
+        );
+    
     square_gen: square
         port map(
             clk => clk,
@@ -113,6 +135,6 @@ begin
             value => pwm_value,
             update => pwm_update,
             amplitude => amplitude,
-            tick_period => "00000000001010" -- 10
+            tick_period => tick_period
         );
 end;

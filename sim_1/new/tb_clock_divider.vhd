@@ -8,21 +8,23 @@ architecture behavioural of tb_clock_divider is
         port(
             clk: in std_logic;
             reset: in std_logic;
-            amp_tick: out std_logic
+            amp_tick: out std_logic;
+            freq_tick: out std_logic
         );
     end component;
     
-    constant clk_period: time := 2ns;
+    constant clk_period: time := 1ns;
     
     signal clk: std_logic := '1';
     signal reset: std_logic := '1';
-    signal amp_tick: std_logic;
+    signal amp_tick, freq_tick: std_logic;
 begin
     uut: clock_divider
         port map(
             clk => clk,
             reset => reset,
-            amp_tick => amp_tick
+            amp_tick => amp_tick,
+            freq_tick => freq_tick
         );
     
     reset <= '0' after 5*clk_period/2;
