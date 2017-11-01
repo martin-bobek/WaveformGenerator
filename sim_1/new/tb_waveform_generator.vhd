@@ -9,7 +9,7 @@ architecture behavioural of tb_waveform_generator is
             clk: in std_logic;
             pwm_out: out std_logic;
             buttons: in std_logic_vector(4 downto 0);
-            switches: in std_logic_vector(0 downto 0)
+            switches: in std_logic_vector(1 downto 0)
         );
     end component;
     
@@ -20,7 +20,7 @@ architecture behavioural of tb_waveform_generator is
     signal amp_down: std_logic := '1';
     signal pwm_out: std_logic;
     signal buttons: std_logic_vector(4 downto 0) := (others => '0');
-    signal switches: std_logic_vector(0 downto 0) := (others => '1');
+    signal switches: std_logic_vector(1 downto 0) := (others => '1');
 begin
     buttons(0) <= reset;
     buttons(2) <= amp_down;

@@ -14,32 +14,32 @@ entity square is
 end;
 
 architecture behavioural of square is
+    component tick_generator is
+        port(
+            clk: in std_logic;
+            reset: in std_logic;
+            period: in std_logic_vector(12 downto 0);
+            update: in std_logic;
+            tick: out std_logic
+        );
+    end component;
+
     constant period_half: unsigned(7 downto 0) := to_unsigned(99, 8);
     constant period_full: unsigned(7 downto 0) := to_unsigned(199, 8);
 
-    signal captured_period: unsigned(12 downto 0);
-    signal update_counter: unsigned(12 downto 0);
+    signal captured_period: std_logic_vector(12 downto 0);
     signal tick_counter: unsigned(7 downto 0);
     signal tick: std_logic;
 begin
-    process(clk, reset) begin
-        if (reset = '1') then
-            tick <= '0';
-            update_counter <= (others => '0');
-        elsif rising_edge(clk) then
-            if (update = '1') then
-                if (update_counter = captured_period) then
-                    update_counter <= to_unsigned(1,13);
-                    tick <= '1';
-                else
-                    update_counter <= update_counter + 1;
-                end if;
-            elsif (tick = '1') then
-                tick <= '0';
-            end if;
-        end if;
-    end process;
-    
+    tick_gen: tick_generator
+        port map(
+            clk => clk,
+            reset => reset,
+            period => captured_period,
+            update => update,
+            tick => tick
+        );
+
     process(clk, reset) begin
         if (reset = '1') then
             value <= (others => '0');
@@ -50,7 +50,7 @@ begin
                 if (tick_counter = period_full) then
                     tick_counter <= (others => '0');
                     value <= amplitude;
-                    captured_period <= unsigned(tick_period);
+                    captured_period <= tick_period;
                 elsif (tick_counter = period_half) then
                     value <= (others => '0');
                     tick_counter <= tick_counter + 1;

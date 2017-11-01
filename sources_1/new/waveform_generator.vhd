@@ -6,7 +6,7 @@ entity waveform_generator is
         clk: in std_logic;
         pwm_out: out std_logic;
         buttons: in std_logic_vector(4 downto 0);
-        switches: in std_logic_vector(0 downto 0)
+        switches: in std_logic_vector(1 downto 0)
     );
 end;
 
@@ -71,6 +71,17 @@ architecture behavioural of waveform_generator is
         );
     end component;
     
+    component sawtooth is
+        port(
+            clk: in std_logic;
+            reset: in std_logic;
+            value: out std_logic_vector(6 downto 0);
+            update: in std_logic;
+            amplitude: in std_logic_vector(6 downto 0);
+            tick_period: in std_logic_vector(12 downto 0)
+        );
+    end component;
+    
     constant pwm_period: integer := 100;
     constant pwm_width: integer := 7;
     
@@ -79,18 +90,20 @@ architecture behavioural of waveform_generator is
     signal amplitude: std_logic_vector(6 downto 0);
     signal freq_up, freq_down, freq_tick: std_logic;
     signal tick_period: std_logic_vector(12 downto 0);
-    signal pwm_value, sin_value, square_value: std_logic_vector(pwm_width - 1 downto 0);
+    signal pwm_value, sin_value, square_value, saw_value: std_logic_vector(pwm_width - 1 downto 0);
     signal pwm_update: std_logic;
-    signal waveform: std_logic;
+    signal waveform: std_logic_vector(1 downto 0);
 begin
     reset <= buttons(0);
     amp_up <= buttons(1);
     amp_down <= buttons(4);
     freq_up <= buttons(3);
     freq_down <= buttons(2);
-    waveform <= switches(0);
+    waveform <= switches(1 downto 0);
     
-    pwm_value <= square_value when (waveform = '0') else sin_value; 
+    pwm_value <= square_value   when (waveform = "00") else
+                 sin_value      when (waveform = "01") else
+                 saw_value;
     
     pwm_gen: pwm
         generic map(
@@ -159,6 +172,16 @@ begin
             reset => reset,
             value => sin_value,
             update => pwm_update,
+            tick_period => tick_period
+        );
+        
+    saw_gen: sawtooth
+        port map(
+            clk => clk,
+            reset => reset,
+            value => saw_value,
+            update => pwm_update,
+            amplitude => amplitude,
             tick_period => tick_period
         );
 end;
