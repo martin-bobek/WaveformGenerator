@@ -8,7 +8,7 @@ entity sin is
         reset: in std_logic;
         value: out std_logic_vector(6 downto 0);
         update: in std_logic;
-        tick_period: in std_logic_vector(13 downto 0)
+        tick_period: in std_logic_vector(12 downto 0)
     );
 end;
 
@@ -20,8 +20,8 @@ architecture behavioural of sin is
         );
     end component;
     
-    signal captured_period: unsigned(13 downto 0);
-    signal update_counter: unsigned(13 downto 0);
+    signal captured_period: unsigned(12 downto 0);
+    signal update_counter: unsigned(12 downto 0);
     signal tick_counter: unsigned(7 downto 0);
     signal tick: std_logic;
 begin
@@ -38,7 +38,7 @@ begin
         elsif rising_edge(clk) then
             if (update = '1') then
                 if (update_counter = captured_period) then
-                    update_counter <= to_unsigned(1,14);
+                    update_counter <= to_unsigned(1,13);
                     tick <= '1';
                 else
                     update_counter <= update_counter + 1;

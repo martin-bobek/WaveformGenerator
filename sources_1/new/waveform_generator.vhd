@@ -57,7 +57,7 @@ architecture behavioural of waveform_generator is
             value: out std_logic_vector(6 downto 0);
             update: in std_logic;
             amplitude: in std_logic_vector(6 downto 0);
-            tick_period: in std_logic_vector(13 downto 0)
+            tick_period: in std_logic_vector(12 downto 0)
         );
     end component;
         
@@ -67,7 +67,7 @@ architecture behavioural of waveform_generator is
             reset: in std_logic;
             value: out std_logic_vector(6 downto 0);
             update: in std_logic;
-            tick_period: in std_logic_vector(13 downto 0)
+            tick_period: in std_logic_vector(12 downto 0)
         );
     end component;
     
@@ -78,7 +78,7 @@ architecture behavioural of waveform_generator is
     signal amp_up, amp_down, amp_tick: std_logic;
     signal amplitude: std_logic_vector(6 downto 0);
     signal freq_up, freq_down, freq_tick: std_logic;
-    signal tick_period: std_logic_vector(13 downto 0);
+    signal tick_period: std_logic_vector(12 downto 0);
     signal pwm_value, sin_value, square_value: std_logic_vector(pwm_width - 1 downto 0);
     signal pwm_update: std_logic;
     signal waveform: std_logic;
@@ -130,9 +130,9 @@ begin
     
     frequency_counter: ud_counter
         generic map(
-            max => 10000,
-            min => 10,
-            width => 14
+            max => 5000,
+            min => 5,
+            width => 13
         )
         port map(
             clk => clk,
