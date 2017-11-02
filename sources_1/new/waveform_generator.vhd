@@ -93,6 +93,17 @@ architecture behavioural of waveform_generator is
         );
     end component;
     
+    component triangle is
+        port(
+          clk: in std_logic;
+          reset: in std_logic;
+          value: out std_logic_vector(6 downto 0);
+          update: in std_logic;
+          amplitude: in std_logic_vector(6 downto 0);
+          tick_period: in std_logic_vector(12 downto 0)
+        );
+    end component; 
+    
     constant pwm_period: integer := 100;
     constant pwm_width: integer := 7;
     
@@ -101,7 +112,7 @@ architecture behavioural of waveform_generator is
     signal amplitude: std_logic_vector(6 downto 0);
     signal freq_up, freq_down, freq_tick: std_logic;
     signal tick_period: std_logic_vector(12 downto 0);
-    signal pwm_value, sin_value, square_value, saw_value: std_logic_vector(pwm_width - 1 downto 0);
+    signal pwm_value, sin_value, square_value, saw_value, triangle_value: std_logic_vector(pwm_width - 1 downto 0);
     signal pwm_update: std_logic;
     signal waveform: std_logic_vector(1 downto 0);
 begin
@@ -114,7 +125,8 @@ begin
     
     pwm_value <= square_value   when (waveform = "00") else
                  sin_value      when (waveform = "01") else
-                 saw_value;
+                 saw_value      when (waveform = "10") else
+                 triangle_value;
     
     pwm_gen: pwm
         generic map(
@@ -186,6 +198,16 @@ begin
             clk => clk,
             reset => reset,
             value => saw_value,
+            update => pwm_update,
+            amplitude => amplitude,
+            tick_period => tick_period
+        );
+        
+    triangle_gen: triangle
+        port map(
+            clk => clk,
+            reset => reset,
+            value => triangle_value,
             update => pwm_update,
             amplitude => amplitude,
             tick_period => tick_period
