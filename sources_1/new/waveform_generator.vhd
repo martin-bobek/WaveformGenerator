@@ -50,6 +50,17 @@ architecture behavioural of waveform_generator is
         );
     end component;
     
+    component linearizer is
+        port(
+            clk: in std_logic;
+            reset: in std_logic;
+            freq_tick: in std_logic;
+            up: in std_logic;
+            down: in std_logic;
+            tick_period: out std_logic_vector(12 downto 0)
+        );
+    end component;
+    
     component square is
         port(
             clk: in std_logic;
@@ -141,20 +152,15 @@ begin
             count => amplitude
         );
     
-    frequency_counter: ud_counter
-        generic map(
-            max => 5000,
-            min => 5,
-            width => 13
-        )
+    frequency_counter: linearizer
         port map(
             clk => clk,
             reset => reset,
-            enable => freq_tick,
+            freq_tick => freq_tick,
             up => freq_up,
             down => freq_down,
-            count => tick_period
-        );
+            tick_period => tick_period
+        ); 
     
     square_gen: square
         port map(

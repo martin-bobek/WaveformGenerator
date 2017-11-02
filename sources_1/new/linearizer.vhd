@@ -30,16 +30,18 @@ architecture behavioural of linearizer is
         );
     end component;
     
+    constant one: unsigned(13 downto 0) := to_unsigned(1, 14);
+    
     signal u_output: unsigned(12 downto 0);
-    signal current_period, next_period: unsigned(9 downto 0);
-    signal counter: unsigned(9 downto 0);
-    signal current_dir, not_dir, next_dir: std_logic;
+    signal period: unsigned(13 downto 0);
+    signal counter: unsigned(13 downto 0);
+    signal last_dir, current_dir, not_dir: std_logic;
     signal update: std_logic;
-    signal product: unsigned(12 downto 0);
+    signal product: unsigned(16 downto 0);
 begin
-    not_dir <= not current_dir;
+    not_dir <= not last_dir;
     tick_period <= std_logic_vector(u_output);
-    product <= resize(next_period * u_output, 13);
+    product <= resize(period * u_output, 17);
     
     tick_period_counter: ud_counter
         generic map(
@@ -52,49 +54,46 @@ begin
             reset => reset,
             enable => update,
             up => not_dir,
-            down => current_dir,
+            down => last_dir,
             unsigned(count) => u_output
         );
 
     process(clk, reset) begin
         if (reset = '1') then
             update <= '0';
-            next_dir <= '0';
+            last_dir <= '0';
             current_dir <= '0';
-            current_period <= to_unsigned(1, 10); 
-            counter <= (others => '0');
+            counter <= one;
         elsif rising_edge(clk) then
             if (freq_tick = '1') then
                 if (up = '1') then
-                    if (next_dir = '0') then
-                        next_dir <= '1';
-                        counter <= (others => '0');
+                    if (current_dir = '0') then
+                        current_dir <= '1';
+                        counter <= one;
                     else
-                        if (counter = current_period) then
-                            counter <= (others => '0');
-                            current_dir <= '1';
-                            current_period <= next_period;
+                        if (counter = period) then
+                            counter <= one;
+                            last_dir <= '1';
                             update <= '1';
                         else
                             counter <= counter + 1;
                         end if;
                     end if;
                 elsif (down = '1') then
-                    if (next_dir = '1') then
-                        next_dir <= '0';
-                        counter <= (others => '0');
+                    if (current_dir = '1') then
+                        current_dir <= '0';
+                        counter <= one;
                     else
-                        if (counter = current_period) then
-                            counter <= (others => '0');
-                            current_dir <= '0';
-                            current_period <= next_period;
+                        if (counter = period) then
+                            counter <= one;
+                            last_dir <= '0';
                             update <= '1';
                         else
                             counter <= counter + 1;
                         end if;
                     end if;
                 else
-                    counter <= (others => '0');
+                    counter <= one;
                 end if;
             end if;
             
@@ -106,15 +105,15 @@ begin
     
     process(reset, clk) begin
         if (reset = '1') then
-            next_period <= to_unsigned(1, 10);
+            period <= to_unsigned(10, 14);
         elsif rising_edge(clk) then
-            if (current_dir = '1') then
-                if (product < 5000) then
-                    next_period <= next_period + 1;
+            if (last_dir = '1') then
+                if (product < 50000) then
+                    period <= period + 1;
                 end if;
             else
-                if (product > 5000) then
-                    next_period <= next_period - 1;
+                if (product > 50000) then
+                    period <= period - 1;
                 end if;
             end if;
         end if;
