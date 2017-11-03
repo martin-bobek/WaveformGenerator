@@ -61,77 +61,47 @@ architecture behavioural of waveform_generator is
         );
     end component;
     
-    component square is
+    component tick_generator is
         port(
             clk: in std_logic;
             reset: in std_logic;
-            value: out std_logic_vector(6 downto 0);
+            period: in std_logic_vector(12 downto 0);
             update: in std_logic;
+            tick: out std_logic
+        );
+    end component;
+    
+    component waveform is
+        port(
+            clk: in std_logic;
+            reset: in std_logic;
+            wave_sel: in std_logic_vector(1 downto 0);
             amplitude: in std_logic_vector(6 downto 0);
-            tick_period: in std_logic_vector(12 downto 0)
+            tick: in std_logic;
+            value: out std_logic_vector(6 downto 0)
         );
     end component;
-        
-    component sin is
-        port(
-            clk: in std_logic;
-            reset: in std_logic;
-            value: out std_logic_vector(6 downto 0);
-            update: in std_logic;
-            tick_period: in std_logic_vector(12 downto 0)
-        );
-    end component;
-    
-    component sawtooth is
-        port(
-            clk: in std_logic;
-            reset: in std_logic;
-            value: out std_logic_vector(6 downto 0);
-            update: in std_logic;
-            amplitude: in std_logic_vector(6 downto 0);
-            tick_period: in std_logic_vector(12 downto 0)
-        );
-    end component;
-    
-    component triangle is
-        port(
-          clk: in std_logic;
-          reset: in std_logic;
-          value: out std_logic_vector(6 downto 0);
-          update: in std_logic;
-          amplitude: in std_logic_vector(6 downto 0);
-          tick_period: in std_logic_vector(12 downto 0)
-        );
-    end component; 
-    
-    constant pwm_period: integer := 100;
-    constant pwm_width: integer := 7;
     
     signal reset: std_logic; 
     signal amp_up, amp_down, amp_tick: std_logic;
     signal amplitude: std_logic_vector(6 downto 0);
     signal freq_up, freq_down, freq_tick: std_logic;
     signal tick_period: std_logic_vector(12 downto 0);
-    signal pwm_value, sin_value, square_value, saw_value, triangle_value: std_logic_vector(pwm_width - 1 downto 0);
-    signal pwm_update: std_logic;
-    signal waveform: std_logic_vector(1 downto 0);
+    signal pwm_value: std_logic_vector(6 downto 0);
+    signal pwm_update, tick: std_logic;
+    signal wave_sel: std_logic_vector(1 downto 0);
 begin
     reset <= buttons(0);
     amp_up <= buttons(1);
     amp_down <= buttons(4);
     freq_up <= buttons(3);
     freq_down <= buttons(2);
-    waveform <= switches(1 downto 0);
-    
-    pwm_value <= square_value   when (waveform = "00") else
-                 sin_value      when (waveform = "01") else
-                 saw_value      when (waveform = "10") else
-                 triangle_value;
+    wave_sel <= switches(1 downto 0);
     
     pwm_gen: pwm
         generic map(
-            width => pwm_width,
-            period => pwm_period
+            width => 7,
+            period => 100
         )
         port map(
             clk => clk,
@@ -173,43 +143,23 @@ begin
             down => freq_down,
             tick_period => tick_period
         ); 
-    
-    square_gen: square
+        
+    tick_gen: tick_generator
         port map(
             clk => clk,
             reset => reset,
-            value => square_value,
+            period => tick_period,
             update => pwm_update,
-            amplitude => amplitude,
-            tick_period => tick_period
+            tick => tick
         );
         
-    sin_gen: sin
+    wave_gen: waveform
         port map(
             clk => clk,
             reset => reset,
-            value => sin_value,
-            update => pwm_update,
-            tick_period => tick_period
-        );
-        
-    saw_gen: sawtooth
-        port map(
-            clk => clk,
-            reset => reset,
-            value => saw_value,
-            update => pwm_update,
+            wave_sel => wave_sel,
             amplitude => amplitude,
-            tick_period => tick_period
-        );
-        
-    triangle_gen: triangle
-        port map(
-            clk => clk,
-            reset => reset,
-            value => triangle_value,
-            update => pwm_update,
-            amplitude => amplitude,
-            tick_period => tick_period
+            tick => tick,
+            value => pwm_value
         );
 end;

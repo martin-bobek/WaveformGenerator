@@ -6,9 +6,8 @@ entity sin is
     port(
         clk: in std_logic;
         reset: in std_logic;
-        value: out std_logic_vector(6 downto 0);
-        update: in std_logic;
-        tick_period: in std_logic_vector(12 downto 0)
+        tick: in std_logic;
+        value: out std_logic_vector(6 downto 0)
     );
 end;
 
@@ -20,19 +19,9 @@ architecture behavioural of sin is
         );
     end component;
     
-    component tick_generator is
-        port(
-            clk: in std_logic;
-            reset: in std_logic;
-            period: in std_logic_vector(12 downto 0);
-            update: in std_logic;
-            tick: out std_logic
-        );
-    end component;
+    constant period_full: unsigned(7 downto 0) := to_unsigned(199, 8);
     
-    signal captured_period: std_logic_vector(12 downto 0);
     signal tick_counter: unsigned(7 downto 0);
-    signal tick: std_logic;
 begin
     lut: lut_sin
         port map(
@@ -40,23 +29,12 @@ begin
             output => value
         );
     
-    tick_gen: tick_generator
-        port map(
-            clk => clk,
-            reset => reset,
-            period => captured_period,
-            update => update,
-            tick => tick
-        );
-    
     process(clk, reset) begin
         if (reset = '1') then
             tick_counter <= (others => '0');
-            captured_period <= (others => '0');
         elsif rising_edge(clk) and (tick = '1') then
             if (tick_counter = 199) then
                 tick_counter <= (others => '0');
-                captured_period <= tick_period;
             else
                 tick_counter <= tick_counter + 1;
             end if;
